@@ -1,0 +1,36 @@
+.debug-highlight {
+	position: absolute;
+	z-index: 20;
+	background-color: Maroon;
+}
+
+#editor {
+	height: 500px;
+	width: 49%;
+}
+
+.logo {
+	padding-left: 30px;
+	background-image: url("https://assets-cdn.github.com/images/modules/logos_page/GitHub-Mark.png");
+	background-size: 30px;
+	background-repeat: no-repeat;
+	background-position: left center;
+}
+
+.container {
+	width: 100%;
+}
+
+#scene {
+	/*height: 500px;
+	width: 49%;*/
+	border-width: 1px;
+	border-color: black;
+	padding-top: 0;
+	float: left;
+}
+
+.updated-variable-item {
+	background-color: LightGreen!important;
+}
+
