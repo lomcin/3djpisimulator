@@ -525,22 +525,21 @@ mini3pi.src = "assets/mini3pi.png";
 background = new Image();
 var iakImg = document.getElementById('imgBackground');
 background.onload = function(){
-  // //console.log("imagem do pololu carregada com sucesso!");
-  // //ctx = canvas.getContext("2d");
-  // //ctx.drawImage(background, 0, 0);
-  // if(canvasBackground == null) {
-  //   canvasBackground = document.getElementById('canvasBackground');//document.createElement('canvas');
-  //   // canvasBackground.width = 735;
-  //   // canvasBackground.height = 500;
-  //   // canvasBackground.style.width  = 735;
-  //   // canvasBackground.style.height = 500;
-  //   ctxBackground = canvasBackground.getContext('2d');
-  // }
-
-  // ctxBackground.drawImage(iakImg, 0, 0);
-  // backgroundData = ctxBackground.getImageData(0, 0, 735, 500);
-  // simulateAndShow();
-  // //console.log(imageData);
+  //console.log("imagem do pololu carregada com sucesso!");
+  //ctx = canvas.getContext("2d");
+  //ctx.drawImage(background, 0, 0);
+  if(canvasBackground == null) {
+    canvasBackground = document.getElementById('canvasBackground');//document.createElement('canvas');
+    // canvasBackground.width = 735;
+    // canvasBackground.height = 500;
+    // canvasBackground.style.width  = 735;
+    // canvasBackground.style.height = 500;
+    ctxBackground = canvasBackground.getContext('2d');
+  }
+  ctxBackground.drawImage(iakImg, 0, 0);
+  backgroundData = ctxBackground.getImageData(0, 0, 735, 500);
+  simulateAndShow();
+  //console.log(imageData);
 };
 background.src = iakImg.src;
 

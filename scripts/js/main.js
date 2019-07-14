@@ -85,6 +85,7 @@ function init() {
 
     textures = {
         bg 			: new THREE.TextureLoader().load( 'assets/img/bg.jpg' ),
+        track 	: new THREE.TextureLoader().load( 'assets/img/7pixels.png' ),
         einstein 	: new THREE.TextureLoader().load( 'assets/img/einstein.jpg' )
     };
     
@@ -95,6 +96,10 @@ function init() {
 
 
     materials = { 
+        track 	: new THREE.MeshBasicMaterial({
+                                map:textures.track,
+                                side : THREE.DoubleSide
+                            }),
         einstein 	: new THREE.MeshBasicMaterial({
                                 map:textures.einstein,
                                 side : THREE.DoubleSide
@@ -107,7 +112,7 @@ function init() {
 
     meshes = {
         box 		: new THREE.Mesh(geometries.box, materials.wired),
-        planeMesh 	: new THREE.Mesh(geometries.plane, materials.einstein)
+        planeMesh 	: new THREE.Mesh(geometries.plane, materials.track)
     };
 
     meshes.planeMesh.rotation.x = Math.PI;
@@ -328,8 +333,8 @@ document.body.onresize = function() {
     camera.updateProjectionMatrix();
 };
 
-renderer.domElement.addEventListener("keydown", keyDownListener, true);
-renderer.domElement.addEventListener("keyup", keyUpListener, false);
+window.addEventListener("keydown", keyDownListener, true);
+window.addEventListener("keyup", keyUpListener, false);
 
 function keyDownListener(e) {
     kb.key[e.key] = true;
