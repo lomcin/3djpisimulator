@@ -5,6 +5,8 @@ var wantDelay = false, wantDelayTime = 0;
 var ctx, ctxBackground;
 var backgroundData;
 var paused = true;
+var simulationScreen;
+
 
 var pololu3piSensors = [];
 var pololu3piSensorsResult = 0;
@@ -523,22 +525,22 @@ mini3pi.src = "assets/mini3pi.png";
 background = new Image();
 var iakImg = document.getElementById('imgBackground');
 background.onload = function(){
-  //console.log("imagem do pololu carregada com sucesso!");
-  //ctx = canvas.getContext("2d");
-  //ctx.drawImage(background, 0, 0);
-  if(canvasBackground == null) {
-    canvasBackground = document.getElementById('canvasBackground');//document.createElement('canvas');
-    // canvasBackground.width = 735;
-    // canvasBackground.height = 500;
-    // canvasBackground.style.width  = 735;
-    // canvasBackground.style.height = 500;
-    ctxBackground = canvasBackground.getContext('2d');
-  }
+  // //console.log("imagem do pololu carregada com sucesso!");
+  // //ctx = canvas.getContext("2d");
+  // //ctx.drawImage(background, 0, 0);
+  // if(canvasBackground == null) {
+  //   canvasBackground = document.getElementById('canvasBackground');//document.createElement('canvas');
+  //   // canvasBackground.width = 735;
+  //   // canvasBackground.height = 500;
+  //   // canvasBackground.style.width  = 735;
+  //   // canvasBackground.style.height = 500;
+  //   ctxBackground = canvasBackground.getContext('2d');
+  // }
 
-  ctxBackground.drawImage(iakImg, 0, 0);
-  backgroundData = ctxBackground.getImageData(0, 0, 735, 500);
-  simulateAndShow();
-  //console.log(imageData);
+  // ctxBackground.drawImage(iakImg, 0, 0);
+  // backgroundData = ctxBackground.getImageData(0, 0, 735, 500);
+  // simulateAndShow();
+  // //console.log(imageData);
 };
 background.src = iakImg.src;
 
@@ -744,12 +746,16 @@ function simulateAndShow() {
 var editor = document.getElementById("editor");
 editor.style.float = 'right';
 var editorParent = editor.parentElement;
+simulationScreen = document.createElement('div');
+simulationScreen.style.width = "50%";
+simulationScreen.style.height = "500px";
+simulationScreen.id = "simulationScreen";
 canvas = document.createElement('canvas');
 canvas.id = "scene";
 //canvas.width = window.innerWidth*0.48;
 canvas.width = 735;
 canvas.height = 500;
-canvas.style.width  = "50%";
+canvas.style.width  = "100%";
 canvas.style.height = "500px";
 canvas.imageSmoothingEnabled = false;
 //canvas.style.zIndex = 8;
@@ -760,4 +766,5 @@ canvas.style.backgroundColor = 'rgba(158, 167, 184, 0.2)';
 canvas.onmousedown = myDown;
 canvas.onmouseup = myUp;
 ctx = canvas.getContext("2d");
-editorParent.appendChild(canvas);
+// simulationScreen.appendChild(canvas);
+editorParent.appendChild(simulationScreen);

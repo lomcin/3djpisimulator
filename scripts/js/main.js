@@ -74,6 +74,7 @@ function closeFullscreen(elem) {
 }
 
 function init() {
+    simulationScreen = document.getElementById("simulationScreen");
     scene = new THREE.Scene();
     // instantiate a loader
     var loader = new THREE.OBJLoader();
@@ -157,15 +158,16 @@ function init() {
 
 
     renderer = new THREE.WebGLRenderer({antialias: true});
-
-    document.body.appendChild(renderer.domElement);
-    renderer.domElement.style.position = "absolute";
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.domElement.style.position = "absolute";
+    
+    simulationScreen.appendChild(renderer.domElement);
+    renderer.domElement.style.position = "relative";
     renderer.domElement.style.top = "0px";
     renderer.domElement.style.left = "0px";
-    windowHalfX = window.innerWidth / 2;
-        windowHalfY = window.innerHeight / 2;
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
+    renderer.setSize(renderer.innerWidth, renderer.innerHeight);
+    windowHalfX = renderer.innerWidth / 2;
+        windowHalfY = renderer.innerHeight / 2;
 
     renderer.domElement.ondblclick = function() {
         if (checkFullScreen()) {
@@ -313,16 +315,16 @@ function render() {
 
 }
 
-document.body.onresize = function() {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.aspect = window.innerWidth / window.innerHeight;
-    windowHalfX = window.innerWidth / 2;
-        windowHalfY = window.innerHeight / 2;
+renderer.domElement.onresize = function() {
+    renderer.setSize(renderer.innerWidth, renderer.innerHeight);
+    camera.aspect = renderer.innerWidth / renderer.innerHeight;
+    windowHalfX = renderer.innerWidth / 2;
+        windowHalfY = renderer.innerHeight / 2;
     camera.updateProjectionMatrix();
 };
 
-document.addEventListener("keydown", keyDownListener, true);
-document.addEventListener("keyup", keyUpListener, false);
+renderer.domElement.addEventListener("keydown", keyDownListener, true);
+renderer.domElement.addEventListener("keyup", keyUpListener, false);
 
 function keyDownListener(e) {
     kb.key[e.key] = true;
@@ -341,8 +343,8 @@ function keyUpListener(e) {
     kb.key[e.key] = false;
 }
 
-window.addEventListener("mousemove", mouseMove, false);
-window.addEventListener("touchmove", touchMove, false);
+renderer.domElement.addEventListener("mousemove", mouseMove, false);
+renderer.domElement.addEventListener("touchmove", touchMove, false);
 
 function mouseMove(event) {
     mouseX = (event.clientX - windowHalfX) / windowHalfX;
