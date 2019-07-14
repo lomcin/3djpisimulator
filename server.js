@@ -1,15 +1,36 @@
-var application_root =  __dirname;
-var express = require('express');
-var http = require('http');
-var app = express();
-app.configure = function(){
+exports.start = function(agentType,port) {
+  const http = require('http')
+  const fs = require('fs');
+  const ip = '0.0.0.0'
+  const origin_path = __dirname
+  //const CircularJSON = require('circular-json');
 
-    //app.use( express.static( path.join( application_root, 'site') ) );
-    app.use(express.static(application_root));
+  const server = http.createServer((req, res) => {
+    //var agentType = '';
+    //agentType = req.rawHeaders.filter(function(a) {return a.toLowerCase().indexOf('mobile') > -1;}).length > 0 ? "mobile" : "default";
+    console.log('ip: '+ req.ip)
+    console.log('req: ' + req.url);
+    console.log("agentType: " + agentType);
+  if (req.url.length == 1) req.url = "/index.html";
+    fs.readFile(origin_path + "/" + agentType + req.url, (err, data) => {
+    if (err) {
+    	console.log(err);
+    	res.writeHead(404, { 'Content-Type': 'text/plain' });
+    }
+    //var str = '' +CircularJSON.stringify(req);
+    res.end(data)
+  });
+    //res.end('<h1>Aqui fica o que vamos enviar para o navegador como resposta!</h1>')
+  })
+
+  server.listen(port, ip, () => {
+    console.log(`Servidor rodando em http://${ip}:${port}`)
+    console.log('Para derrubar o servidor: ctrl + c');
+  })
 
 };
-//http.createServer(app).listen(1234, "127.0.0.1");
-app.listen(1234,function() {
-    console.log( 'Express server listening on port %d in %s mode', port, app.settings.env );
-});
-console.log('Server running at http://127.0.0.1:1234/');
+
+const agentType = '';
+const port = 8080;
+const serverJS = require('./server.js');
+serverJS.start(agentType,port);
