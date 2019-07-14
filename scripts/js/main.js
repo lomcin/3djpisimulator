@@ -158,23 +158,26 @@ function init() {
 
 
     renderer = new THREE.WebGLRenderer({antialias: true});
-    
+    renderer.domElement.id = "scene";
     simulationScreen.appendChild(renderer.domElement);
     renderer.domElement.style.position = "relative";
     renderer.domElement.style.top = "0px";
     renderer.domElement.style.left = "0px";
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
-    renderer.setSize(renderer.innerWidth, renderer.innerHeight);
-    windowHalfX = renderer.innerWidth / 2;
-        windowHalfY = renderer.innerHeight / 2;
+
+    console.log("renderer :  " + simulationScreen.offsetWidth + " " + simulationScreen.offsetHeight);
+    renderer.setSize(simulationScreen.offsetWidth, simulationScreen.offsetHeight);
+    windowHalfX = simulationScreen.offsetWidth / 2;
+        windowHalfY = simulationScreen.offsetHeight / 2;
+    camera.updateProjectionMatrix();
 
     renderer.domElement.ondblclick = function() {
         if (checkFullScreen()) {
             closeFullscreen(document);
         }
         else {
-            openFullscreen(renderer.domElement);
+            openFullscreen(simulationScreen);
         }
     };
 
@@ -213,6 +216,7 @@ function init() {
     }
 
     renderer.domElement.onwheel = function(e) {
+        e.preventDefault();
         if (e.deltaY > 0) {
             ui.cameraDistanceFromFocus *= 1. + Math.min((e.deltaY*0.001),1);
             ui.cameraDistanceFromFocus = Math.max(ui.cameraDistanceFromFocus,100);
@@ -315,11 +319,12 @@ function render() {
 
 }
 
-renderer.domElement.onresize = function() {
-    renderer.setSize(renderer.innerWidth, renderer.innerHeight);
-    camera.aspect = renderer.innerWidth / renderer.innerHeight;
-    windowHalfX = renderer.innerWidth / 2;
-        windowHalfY = renderer.innerHeight / 2;
+document.body.onresize = function() {
+    renderer.setSize(simulationScreen.offsetWidth, simulationScreen.offsetHeight);
+    camera.aspect = simulationScreen.offsetWidth / simulationScreen.offsetHeight;
+    windowHalfX = simulationScreen.offsetWidth / 2;
+        windowHalfY = simulationScreen.offsetHeight / 2;
+    console.log("renderer " + simulationScreen.offsetWidth + "x" + simulationScreen.offsetHeight);
     camera.updateProjectionMatrix();
 };
 
