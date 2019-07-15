@@ -371,15 +371,18 @@ Main = React.createClass({
   },
   handleFile2: function(e) {
     var reader = new FileReader();
+    trackFilePath = e.target.files[0];
     reader.onload = function(event){
         var timg = new Image();
         timg.onload = function(){
             //canvas.width = img.width;
             //canvas.height = img.height;
             //ctx.drawImage(timg,0,0);
-            background = timg;
-            ctxBackground.drawImage(background,0,0);
-            backgroundData = ctxBackground.getImageData(0, 0, 735, 500);
+            // background = timg;
+            // ctxBackground.drawImage(background,0,0);
+            // backgroundData = ctxBackground.getImageData(0, 0, 735, 500);
+            
+            loadNewTrackFromImage(timg);
         }
         timg.src = event.target.result;
     }

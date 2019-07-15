@@ -22,9 +22,23 @@ var ui = {
     cameraPhi : Math.PI/3,
     lastCameraTheta : 0,
     lastCameraPhi : this.cameraPhi,
-    cameraDistanceFromFocus : 800,
-    firstPersonCamera : false
+    cameraDistanceFromFocus : 8000,
+    firstPersonCamera : false,
+    textureScale: 1000 // 1000 pixels for 1 meter
 };
+
+function getImageData( image ) {
+
+    var canvas = document.createElement( 'canvas' );
+    canvas.width = image.width;
+    canvas.height = image.height;
+
+    var context = canvas.getContext( '2d' );
+    context.drawImage( image, 0, 0 );
+
+    return context.getImageData( 0, 0, image.width, image.height );
+
+}
 
 init(); 
 animate();
@@ -73,6 +87,41 @@ function closeFullscreen(elem) {
     }
 }
 
+var trackFilePath="";
+
+function loadNewTrack(filePath) {
+    console.log("file Path : ");
+    textures.track = new THREE.TextureLoader().load( filePath );
+    // materials.track = new THREE.MeshBasicMaterial({
+    //                     map:textures.track,
+    //                     side : THREE.DoubleSide
+    //                 });
+    // meshes.planeMesh = new THREE.Mesh(geometries.plane, materials.track);
+}
+
+function loadNewTrackFromData(data, width, height) {
+    textures.track = new THREE.DataTexture( data, width, height, THREE.RGBAFormat );
+    meshes.planeMesh.material.map = textures.track;
+    meshes.planeMesh.material.map.needsUpdate = true;
+    // materials.track = new THREE.MeshBasicMaterial({
+        //                     map:textures.track,
+        //                     side : THREE.DoubleSide
+        //                 });
+        // meshes.planeMesh = new THREE.Mesh(geometries.plane, materials.track);
+    }
+    
+function loadNewTrackFromImage(img) {
+    backgroundData = getImageData(img);
+    loadNewTrackFromData(backgroundData,img.width,img.height);
+    setTrackScaleFromTexture(textures.track);
+    console.log("loaded");
+}
+
+function setTrackScaleFromTexture(texture) {
+    meshes.planeMesh.scale.set(texture.image.width,texture.image.height,1);
+    console.log("scaled");
+}
+
 function init() {
     simulationScreen = document.getElementById("simulationScreen");
     scene = new THREE.Scene();
@@ -80,18 +129,19 @@ function init() {
     var loader = new THREE.OBJLoader();
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100000000);
-    camera.position.z = 1000;
+    camera.position.z = 10000;
     camera.up = new THREE.Vector3(0,0,1);
 
     textures = {
         bg 			: new THREE.TextureLoader().load( 'assets/img/bg.jpg' ),
-        track 	: new THREE.TextureLoader().load( 'assets/img/7pixels.png' ),
+        // track 	: new THREE.TextureLoader().load( 'assets/img/7pixels.png', function(texture) {geometries.plane = new THREE.PlaneGeometry(texture.image.width,texture.image.height); geometries.plane.needsUpdate=true;} ),
+        track 	: new THREE.TextureLoader().load( 'assets/img/7pixels.png', setTrackScaleFromTexture ),
         einstein 	: new THREE.TextureLoader().load( 'assets/img/einstein.jpg' )
     };
     
     geometries = {
-        box 		: new THREE.BoxGeometry(100, 100, 100),
-        plane 		: new THREE.PlaneGeometry(620*2,747*2)
+        box 		: new THREE.BoxGeometry(500, 500, 500),
+        plane 		: new THREE.PlaneGeometry(1,1)
     };
 
 
@@ -148,12 +198,12 @@ function init() {
                 .load( objFileName + '.obj', function ( object ) {
                     robot = object;
                     robot.rotation.z = Math.PI;
-                    robot.scale.x = robot.scale.y = robot.scale.z = 5;
+                    robot.scale.x = robot.scale.y = robot.scale.z = 1;
                     robot.position.x = robot.position.y = robot.position.z = 0;
                     robot.da = robot.dx = robot.dy = 0;
                     robot.speedFactor = 0;
-                    robot.walkSpeed = 3;
-                    robot.linearFriction = 0.4;
+                    robot.walkSpeed = 1;
+                    robot.linearFriction = 0.7;
                     robot.name = "robot";
                     scene.add( object );
                 }, onProgress, onError );
