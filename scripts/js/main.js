@@ -187,7 +187,7 @@ function init() {
     var onError = function () { };
 
     var objFolder = 'p3pi';
-    var objFileName = 'p3pi2';
+    var objFileName = 'p3pi3';
 
     new THREE.MTLLoader()
         .setPath( 'assets/models/'+objFolder+'/' )
