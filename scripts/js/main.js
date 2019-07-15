@@ -153,10 +153,14 @@ function insertSensors(object) {
 }
 
 function getSensorsPositions(object) {
+    var sensorsPositions = Array();
     for (var i=0;i<5;i++) {
-        object = robot.getChildByName("sensor_"+i);
-        object.updateMatrixWorld();
+        var sensor = robot.getObjectByName("sensor_"+i);
+        sensor.updateMatrixWorld();
+        var vector = sensor.position.clone();
+        sensorsPositions.push(vector.applyMatrix4( sensor.matrixWorld.clone() ));
     }
+    return sensorsPositions;
 }
 
 function readSensors(sensorsPositions) {
@@ -164,14 +168,14 @@ function readSensors(sensorsPositions) {
     var sum = 0;
     for (var i=0; i<5; i++) {
         // pololu3piSensors[i] = backgroundData.data[(tempy*735+tempx)*4];
-        pololu3piSensors[i] = (i == 1 | i == 2 ? 0 : 1); 
+        pololu3piSensors[i] = (i == 2 ? 0 : 1); 
         tempSensor += (pololu3piSensors[i]/255.0)*(i+1)*1000;
         sum += pololu3piSensors[i]/255.0;
       }
     
       tempSensor /= sum;
     
-      //console.log(tempSensor);
+      console.log(tempSensor);
     
       pololu3piSensorsResult = tempSensor;
 }
@@ -348,23 +352,23 @@ function init() {
   function simulateAndShow() {
     console.log("simulateAndShow");
     simulate();
-    // drawImageCenter(mini3pi, sim3pi.x, sim3pi.y, sim3pi.rotation);
-    //readPixel(sim3pi.x, sim3pi.y, sim3pi.rotation+3.14/2);
-    // const sensorPositions = getSensorsPositions(robot);
-    // readSensors(sensorPositions);
-  
     if(paused == false) {
-      var vc2 = jscpp["debugger"].setVariable("robot");
-      vc2["robot"].v.members.sensorValues.v = pololu3piSensorsResult;
+        // drawImageCenter(mini3pi, sim3pi.x, sim3pi.y, sim3pi.rotation);
+        //readPixel(sim3pi.x, sim3pi.y, sim3pi.rotation+3.14/2);
+        var sensorPositions = getSensorsPositions(robot);
+        // readSensors(sensorPositions);
+        
+        var vc2 = jscpp["debugger"].setVariable("robot");
+        vc2["robot"].v.members.sensorValues.v = pololu3piSensorsResult;
     }
   
-    setTimeout(simulateAndShow, 50);
+    // setTimeout(simulateAndShow, 50);
   }
 
 function animate() {
     requestAnimationFrame(animate);
     readKeys();
-    simulate();
+    simulateAndShow();
     render();
 }
 
@@ -556,30 +560,31 @@ function simulate() {
         var y = robot.position.y;
         var theta = robot.rotation.z;
     
-        var dt = 0.01;
+        var dt = 0.005;
     
         var vc = jscpp["debugger"].setVariable("OrangutanMotors");
         var vleft = -vc["OrangutanMotors"].v.members.vleft.v;
         var vright = -vc["OrangutanMotors"].v.members.vright.v;
-    
-        if (Math.abs(vright) <= 10.9 / 2.9) {
+        const wheelConstant = 10.9;
+        const smallWheelConstant = 2.9;
+        if (Math.abs(vright) <= wheelConstant / smallWheelConstant) {
         vright = 0;
         }
         else if (vright > 0) {
-        vright = vright * 2.9 - 10.9;
+        vright = vright * smallWheelConstant - wheelConstant;
         }
         else {
-        vright = vright * 2.9 + 10.9;
+        vright = vright * smallWheelConstant + wheelConstant;
         }
     
-        if (Math.abs(vleft) < 10.9 / 2.9) {
+        if (Math.abs(vleft) < wheelConstant / smallWheelConstant) {
         vleft = 0;
         }
         else if (vleft > 0) {
-        vleft = vleft * 2.9 - 10.9;
+        vleft = vleft * smallWheelConstant - wheelConstant;
         }
         else {
-        vleft = vleft * 2.9 + 10.9;
+        vleft = vleft * smallWheelConstant + wheelConstant;
         }
     
         var diameter = 95;
