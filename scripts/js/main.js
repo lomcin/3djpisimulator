@@ -125,7 +125,7 @@ function loadNewTrackFromImage(img) {
     canvas = getImageCanvas(img);
     loadNewTrackFromCanvas(canvas,img.width,img.height);
     setTrackScaleFromTexture(textures.track);
-    console.log("loaded");
+    // console.log("loaded");
 }
 
 function getPixel(canvas, x, y) {
@@ -133,7 +133,7 @@ function getPixel(canvas, x, y) {
     var pixel = [255,255,255,255];
     if (x > -1 && x < canvas.width && y > -1 && y < canvas.height) {
         pixel = ctx.getImageData(x, y, 1, 1).data;
-        console.log(pixel);
+        // console.log(pixel);
     }
     return pixel;
 }
@@ -142,7 +142,7 @@ function setTrackScaleFromTexture(texture) {
     meshes.planeMesh.scale.set(texture.image.width/ui.textureScale,texture.image.height/ui.textureScale,1);
     // background = texture.image;
     // backgroundData = background.data;
-    console.log("scaled");
+    // console.log("scaled");
 }
 
 function insertSensors(object) {
@@ -172,22 +172,23 @@ function getSensorsPositions(object) {
         var vector = sensor.position.clone();
         sensorsPositions.push(vector.applyMatrix4( sensor.matrixWorld.clone() ));
     }
-    console.log("getSensorsPositions");
-    console.log(sensorsPositions);
+    // console.log("getSensorsPositions");
+    // console.log(sensorsPositions);
     return sensorsPositions;
 }
 
 function readSensors(sensorsPositions) {
     var tempSensor = 0;
     var sum = 0;
-    console.log("readSensors");
+    // console.log("readSensors");
     // console.log(sensorsPositions);
     for (var i=0; i<5; i++) {
         // pololu3piSensors[i] = backgroundData[(sensorsPositions[i].y*background.width+sensorsPositions[i].x)*4];
         pololu3piSensors[i] = getPixel(background,sensorsPositions[i].x*ui.textureScale + background.width*0.5, background.height*0.5 - sensorsPositions[i].y*ui.textureScale)[0];
         //pololu3piSensors[i] = (i != 4 && i!=0 ? 0 : 255); 
-        tempSensor += (pololu3piSensors[i]/255.0)*(i+1)*1000;
+        tempSensor += (1- pololu3piSensors[i]/255.0)*(i+1)*1000;
         sum += pololu3piSensors[i]/255.0;
+        // sum += 1;
       }
     
       tempSensor /= sum;
@@ -214,7 +215,7 @@ function init() {
     textures = {
         bg 			: new THREE.TextureLoader().load( 'assets/img/bg.jpg' ),
         // track 	: new THREE.TextureLoader().load( 'assets/img/7pixels.png', function(texture) {geometries.plane = new THREE.PlaneGeometry(texture.image.width,texture.image.height); geometries.plane.needsUpdate=true;} ),
-        track 	: new THREE.TextureLoader().load( 'assets/img/3cm.png', function(texture) {loadNewTrackFromImage(texture.image);}),
+        track 	: new THREE.TextureLoader().load( 'assets/img/circular3cm.png', function(texture) {loadNewTrackFromImage(texture.image);}),
         einstein 	: new THREE.TextureLoader().load( 'assets/img/einstein.jpg' )
     };
     
@@ -305,7 +306,7 @@ function init() {
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
 
-    console.log("renderer :  " + simulationScreen.offsetWidth + " " + simulationScreen.offsetHeight);
+    // console.log("renderer :  " + simulationScreen.offsetWidth + " " + simulationScreen.offsetHeight);
     renderer.setSize(simulationScreen.offsetWidth, simulationScreen.offsetHeight);
     windowHalfX = simulationScreen.offsetWidth / 2;
         windowHalfY = simulationScreen.offsetHeight / 2;
@@ -369,7 +370,7 @@ function init() {
 
 
   function simulateAndShow() {
-    console.log("simulateAndShow");
+    // console.log("simulateAndShow");
     simulate();
     if(paused == false) {
         // drawImageCenter(mini3pi, sim3pi.x, sim3pi.y, sim3pi.rotation);
@@ -570,7 +571,7 @@ function simulate() {
         // // get robot angle for force direction estimation
         
 
-        console.log("simulate");
+        // console.log("simulate");
         // var x = sim3pi.x;
         // var y = sim3pi.y;
         // var theta = sim3pi.rotation;
