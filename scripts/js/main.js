@@ -33,11 +33,24 @@ function getImageData( image ) {
     var canvas = document.createElement( 'canvas' );
     canvas.width = image.width;
     canvas.height = image.height;
-
+    
     var context = canvas.getContext( '2d' );
     context.drawImage( image, 0, 0 );
+    var imageData = context.getImageData( 0, 0, image.width, image.height );
+    return imageData;
 
-    return context.getImageData( 0, 0, image.width, image.height );
+}
+
+
+function getImageCanvas( image ) {
+
+    var canvas = document.createElement( 'canvas' );
+    canvas.width = image.width;
+    canvas.height = image.height;
+    
+    var context = canvas.getContext( '2d' );
+    context.drawImage( image, 0, 0 );
+    return canvas;
 
 }
 
@@ -93,27 +106,20 @@ var trackFilePath="";
 function loadNewTrack(filePath) {
     console.log("file Path : ");
     textures.track = new THREE.TextureLoader().load( filePath );
-    // materials.track = new THREE.MeshBasicMaterial({
-    //                     map:textures.track,
-    //                     side : THREE.DoubleSide
-    //                 });
-    // meshes.planeMesh = new THREE.Mesh(geometries.plane, materials.track);
 }
 
-function loadNewTrackFromData(data, width, height) {
-    textures.track = new THREE.DataTexture( data, width, height, THREE.RGBAFormat );
+function loadNewTrackFromData(canvas, width, height) {
+    var size = width * height;
+
+    textures.track = new THREE.CanvasTexture(canvas);
     meshes.planeMesh.material.map = textures.track;
     meshes.planeMesh.material.map.needsUpdate = true;
-    // materials.track = new THREE.MeshBasicMaterial({
-        //                     map:textures.track,
-        //                     side : THREE.DoubleSide
-        //                 });
-        // meshes.planeMesh = new THREE.Mesh(geometries.plane, materials.track);
-    }
+}
     
 function loadNewTrackFromImage(img) {
-    backgroundData = getImageData(img);
-    loadNewTrackFromData(backgroundData,img.width,img.height);
+    // backgroundData = getImageData(img);
+    canvas = getImageCanvas(img);
+    loadNewTrackFromData(canvas,img.width,img.height);
     setTrackScaleFromTexture(textures.track);
     console.log("loaded");
 }
@@ -418,7 +424,6 @@ function mouseMove(event) {
     
     if (ui.cameraFocusOnRobot) {
         if (!ui.firstPersonCamera) {
-                console.log(event);
                 if (ui.isRotating) {
                 ui.cameraTheta = ui.lastCameraTheta + Math.PI*(lastMouseX - mouseX);
                 ui.cameraPhi = ui.lastCameraPhi + Math.PI*(mouseY - lastMouseY)*0.5;
