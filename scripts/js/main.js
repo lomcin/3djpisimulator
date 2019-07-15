@@ -579,13 +579,13 @@ function simulate() {
         var y = robot.position.y;
         var theta = robot.rotation.z;
     
-        var dt = 0.005;
+        var dt = 0.01;
     
         var vc = jscpp["debugger"].setVariable("OrangutanMotors");
         var vleft = -vc["OrangutanMotors"].v.members.vleft.v;
         var vright = -vc["OrangutanMotors"].v.members.vright.v;
-        const wheelConstant = 10.9;
-        const smallWheelConstant = 2.9;
+        const wheelConstant = 1.09;
+        const smallWheelConstant = .29;
         if (Math.abs(vright) <= wheelConstant / smallWheelConstant) {
         vright = 0;
         }
@@ -606,11 +606,11 @@ function simulate() {
         vleft = vleft * smallWheelConstant + wheelConstant;
         }
     
-        var diameter = 95;
+        var diameter = 9.5;
     
         var v = -(vleft + vright) / 2; // x velocity
         var w = (vright - vleft) / diameter; // angular velocity
-        var newTheta = theta + w * dt;
+        var newTheta = theta + w * dt - Math.PI*0.5;
         
         // sim3pi.x = x + dt * v * Math.cos(newTheta);
         // sim3pi.y = y + dt * v * Math.sin(newTheta);
