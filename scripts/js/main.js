@@ -28,6 +28,10 @@ var ui = {
     textureScale: 10 // 10 pixels for 1 centimeter, 1000 pixels for 1 meter
 };
 
+const dotGeometry = new THREE.Geometry();
+dotGeometry.vertices.push(new THREE.Vector3( 0, 0, 0));
+const dotMaterial = new THREE.PointsMaterial( { size: 4, sizeAttenuation: false, color: 0xff0000} );
+
 function getImageData( image ) {
 
     var canvas = document.createElement( 'canvas' );
@@ -129,7 +133,51 @@ function setTrackScaleFromTexture(texture) {
     console.log("scaled");
 }
 
+function insertSensors(object) {
+    const robotRadius = object.radius;
+    var sensorPositions = Array();
+    const sensorAmplitude = Math.PI/3;
+    for(var i=0; i<5;i++) {
+        var ang = i*sensorAmplitude*0.25 + sensorAmplitude + Math.PI;
+        var x = robotRadius*Math.cos(ang);
+        var y = robotRadius*Math.sin(ang);
+        sensorPositions.push([x, y]);
+
+        var sensor = new THREE.Points( dotGeometry, dotMaterial);
+        sensor.position.x = x;
+        sensor.position.y = y;
+        sensor.position.z = 3;
+        sensor.name = "sensor_" + i;
+        object.add( sensor );
+    }
+}
+
+function getSensorsPositions(object) {
+    for (var i=0;i<5;i++) {
+        object = robot.getChildByName("sensor_"+i);
+        object.updateMatrixWorld();
+    }
+}
+
+function readSensors(sensorsPositions) {
+    var tempSensor = 0;
+    var sum = 0;
+    for (var i=0; i<5; i++) {
+        // pololu3piSensors[i] = backgroundData.data[(tempy*735+tempx)*4];
+        pololu3piSensors[i] = (i == 1 | i == 2 ? 0 : 1); 
+        tempSensor += (pololu3piSensors[i]/255.0)*(i+1)*1000;
+        sum += pololu3piSensors[i]/255.0;
+      }
+    
+      tempSensor /= sum;
+    
+      //console.log(tempSensor);
+    
+      pololu3piSensorsResult = tempSensor;
+}
+
 function init() {
+
     simulationScreen = document.getElementById("simulationScreen");
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xFFFFFFFF);
@@ -196,6 +244,8 @@ function init() {
     var objFolder = 'p3pi';
     var objFileName = 'p3pi3';
 
+    
+
     new THREE.MTLLoader()
         .setPath( 'assets/models/'+objFolder+'/' )
         .load( objFileName+'.mtl', function ( materials ) {
@@ -213,11 +263,14 @@ function init() {
                     robot.walkSpeed = 1;
                     robot.linearFriction = 0.7;
                     robot.name = "robot";
+                    robot.diameter = 9.5;
+                    robot.radius = robot.diameter*0.5;
+                    insertSensors(robot);
                     scene.add( object );
                 }, onProgress, onError );
         } );
 
-
+    
 
 
     renderer = new THREE.WebGLRenderer({antialias: true});
@@ -290,6 +343,23 @@ function init() {
     }
 
 }
+
+
+  function simulateAndShow() {
+    console.log("simulateAndShow");
+    simulate();
+    // drawImageCenter(mini3pi, sim3pi.x, sim3pi.y, sim3pi.rotation);
+    //readPixel(sim3pi.x, sim3pi.y, sim3pi.rotation+3.14/2);
+    // const sensorPositions = getSensorsPositions(robot);
+    // readSensors(sensorPositions);
+  
+    if(paused == false) {
+      var vc2 = jscpp["debugger"].setVariable("robot");
+      vc2["robot"].v.members.sensorValues.v = pololu3piSensorsResult;
+    }
+  
+    setTimeout(simulateAndShow, 50);
+  }
 
 function animate() {
     requestAnimationFrame(animate);
@@ -457,18 +527,74 @@ function touchMove(event) {
 }
 
 function simulate() {
-    if (robot) {
-        // get robot angle for force direction estimation
-        robotAngle = robot.rotation.z - Math.PI/2;
-        robot.dx += Math.cos(robotAngle)*robot.walkSpeed*robot.speedFactor;
-        robot.dy += Math.sin(robotAngle)*robot.walkSpeed*robot.speedFactor;
-        robot.speedFactor = 0;
-        robot.dx *= 1-robot.linearFriction;
-        robot.dy *= 1-robot.linearFriction;
+    if(paused == true) {
+        if (robot) {
+            robotAngle = robot.rotation.z - Math.PI/2;
+            robot.dx += Math.cos(robotAngle)*robot.walkSpeed*robot.speedFactor;
+            robot.dy += Math.sin(robotAngle)*robot.walkSpeed*robot.speedFactor;
+            robot.speedFactor = 0;
+            robot.dx *= 1-robot.linearFriction;
+            robot.dy *= 1-robot.linearFriction;
 
-        robot.rotation.z += robot.da;
-        robot.da *= 1-robot.linearFriction;
-        robot.position.x += robot.dx;
-        robot.position.y += robot.dy;
+            robot.rotation.z += robot.da;
+            robot.da *= 1-robot.linearFriction;
+            robot.position.x += robot.dx;
+            robot.position.y += robot.dy;
+        }
+        return;
+    }
+    if (robot) {
+        // // get robot angle for force direction estimation
+        
+
+        console.log("simulate");
+        // var x = sim3pi.x;
+        // var y = sim3pi.y;
+        // var theta = sim3pi.rotation;
+    
+        var x = robot.position.x;
+        var y = robot.position.y;
+        var theta = robot.rotation.z;
+    
+        var dt = 0.01;
+    
+        var vc = jscpp["debugger"].setVariable("OrangutanMotors");
+        var vleft = -vc["OrangutanMotors"].v.members.vleft.v;
+        var vright = -vc["OrangutanMotors"].v.members.vright.v;
+    
+        if (Math.abs(vright) <= 10.9 / 2.9) {
+        vright = 0;
+        }
+        else if (vright > 0) {
+        vright = vright * 2.9 - 10.9;
+        }
+        else {
+        vright = vright * 2.9 + 10.9;
+        }
+    
+        if (Math.abs(vleft) < 10.9 / 2.9) {
+        vleft = 0;
+        }
+        else if (vleft > 0) {
+        vleft = vleft * 2.9 - 10.9;
+        }
+        else {
+        vleft = vleft * 2.9 + 10.9;
+        }
+    
+        var diameter = 95;
+    
+        var v = -(vleft + vright) / 2; // x velocity
+        var w = (vright - vleft) / diameter; // angular velocity
+        var newTheta = theta + w * dt;
+        
+        // sim3pi.x = x + dt * v * Math.cos(newTheta);
+        // sim3pi.y = y + dt * v * Math.sin(newTheta);
+        // sim3pi.rotation = theta + dt * w;
+    
+        robot.position.x = x + dt * v * Math.cos(newTheta);
+        robot.position.y = y + dt * v * Math.sin(newTheta);
+        robot.rotation.z = theta + dt * w;
+        
     }
 }

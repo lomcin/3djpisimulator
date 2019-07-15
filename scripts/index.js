@@ -514,37 +514,37 @@ Main = React.createClass({
 
 var jscpp = React.render(React.createElement(Main, null), document.getElementById("mycontainer"));
 
-mini3pi = new Image();
-mini3pi.onload = function(){
-  //console.log("imagem do pololu carregada com sucesso!");
-  //drawImageCenter(mini3pi, sim3pi.x, sim3pi.y, sim3pi.rotation);
-  //console.log(mini3pi.width/2 + " " + mini3pi.height/2);
+// mini3pi = new Image();
+// mini3pi.onload = function(){
+//   //console.log("imagem do pololu carregada com sucesso!");
+//   //drawImageCenter(mini3pi, sim3pi.x, sim3pi.y, sim3pi.rotation);
+//   //console.log(mini3pi.width/2 + " " + mini3pi.height/2);
 
-  //ctx.rect(20,20,30,30);
-  //ctx.stroke();
-};
-mini3pi.src = "assets/mini3pi.png";
+//   //ctx.rect(20,20,30,30);
+//   //ctx.stroke();
+// };
+// mini3pi.src = "assets/mini3pi.png";
 
-background = new Image();
-var iakImg = document.getElementById('imgBackground');
-background.onload = function(){
-  //console.log("imagem do pololu carregada com sucesso!");
-  //ctx = canvas.getContext("2d");
-  //ctx.drawImage(background, 0, 0);
-  if(canvasBackground == null) {
-    canvasBackground = document.getElementById('canvasBackground');//document.createElement('canvas');
-    // canvasBackground.width = 735;
-    // canvasBackground.height = 500;
-    // canvasBackground.style.width  = 735;
-    // canvasBackground.style.height = 500;
-    ctxBackground = canvasBackground.getContext('2d');
-  }
-  ctxBackground.drawImage(iakImg, 0, 0);
-  backgroundData = ctxBackground.getImageData(0, 0, 735, 500);
-  simulateAndShow();
-  //console.log(imageData);
-};
-background.src = iakImg.src;
+// background = new Image();
+// var iakImg = document.getElementById('imgBackground');
+// background.onload = function(){
+//   //console.log("imagem do pololu carregada com sucesso!");
+//   //ctx = canvas.getContext("2d");
+//   //ctx.drawImage(background, 0, 0);
+//   if(canvasBackground == null) {
+//     canvasBackground = document.getElementById('canvasBackground');//document.createElement('canvas');
+//     // canvasBackground.width = 735;
+//     // canvasBackground.height = 500;
+//     // canvasBackground.style.width  = 735;
+//     // canvasBackground.style.height = 500;
+//     ctxBackground = canvasBackground.getContext('2d');
+//   }
+//   ctxBackground.drawImage(iakImg, 0, 0);
+//   backgroundData = ctxBackground.getImageData(0, 0, 735, 500);
+//   simulateAndShow();
+//   //console.log(imageData);
+// };
+// background.src = iakImg.src;
 
 function drawImageCenter(image, x, y, rotation){
 //    ctx.setTransform(scale, 0, 0, scale, x, y); // sets scale and origin
@@ -576,14 +576,28 @@ function drawImageCenter(image, x, y, rotation){
 }
 
 function readPixel(x, y, rotation) {
+  console.log("readPixel");
   //var t = rotation * 3.14/180;
   var t = rotation;
-  var sensorPositions = [[8.04167*Math.cos(t) + 11.8333*Math.sin(t),11.8333*Math.cos(t) - 8.04167*Math.sin(t)],
-  [3.125*Math.cos(t) + 14.0417*Math.sin(t), 14.0417*Math.cos(t) - 3.125*Math.sin(t)],
-  [14.375*Math.sin(t), 14.375*Math.cos(t)],
-  [14.0417*Math.sin(t) - 3.16667*Math.cos(t), 14.0417*Math.cos(t) + 3.16667*Math.sin(t)],
-  //[19.9*Math.sin(t) - 8.04167*Math.cos(t), 19.9*Math.cos(t) + 8.04167*Math.sin(t)]];
-  [11.8333*Math.sin(t) - 8.04167*Math.cos(t), 11.8333*Math.cos(t) + 8.04167*Math.sin(t)]];
+  const robotRadius = robot.radius;
+  // var sensorPositions = [[8.04167*Math.cos(t) + 11.8333*Math.sin(t),11.8333*Math.cos(t) - 8.04167*Math.sin(t)],
+  // [3.125*Math.cos(t) + 14.0417*Math.sin(t), 14.0417*Math.cos(t) - 3.125*Math.sin(t)],
+  // [14.375*Math.sin(t), 14.375*Math.cos(t)],
+  // [14.0417*Math.sin(t) - 3.16667*Math.cos(t), 14.0417*Math.cos(t) + 3.16667*Math.sin(t)],
+  // //[19.9*Math.sin(t) - 8.04167*Math.cos(t), 19.9*Math.cos(t) + 8.04167*Math.sin(t)]];
+  // [11.8333*Math.sin(t) - 8.04167*Math.cos(t), 11.8333*Math.cos(t) + 8.04167*Math.sin(t)]];
+  var sensorPositions = Array();
+  const sensorAmplitude = Math.PI/3;
+  for(var i=0; i<5;i++) {
+    var ang = i*sensorAmplitude*0.25 + sensorAmplitude*0.75;
+    sensorPositions.push([robotRadius*Math.cos(ang), robotRadis*Math.sin(ang)]);
+  }
+
+  var dot = new THREE.Points( dotGeometry, dotMaterial );
+  dot.position.x = 0;
+  dot.position.y = 0;
+  dot.position.z = 30;
+  scene.add( dot );
 
   //var output = "";
 
@@ -687,63 +701,7 @@ function myUp() {
     canvas.onmousemove = null;
 }
 
-function simulate() {
 
-  if(paused == true) return;
-
-  var x = sim3pi.x;
-  var y = sim3pi.y;
-  var theta = sim3pi.rotation;
-
-  var dt = 0.01;
-
-  var vc = jscpp["debugger"].setVariable("OrangutanMotors");
-  var vleft = -vc["OrangutanMotors"].v.members.vleft.v;
-  var vright = -vc["OrangutanMotors"].v.members.vright.v;
-
-  if (Math.abs(vright) <= 10.9 / 2.9) {
-    vright = 0;
-  }
-  else if (vright > 0) {
-    vright = vright * 2.9 - 10.9;
-  }
-  else {
-    vright = vright * 2.9 + 10.9;
-  }
-
-  if (Math.abs(vleft) < 10.9 / 2.9) {
-    vleft = 0;
-  }
-  else if (vleft > 0) {
-    vleft = vleft * 2.9 - 10.9;
-  }
-  else {
-    vleft = vleft * 2.9 + 10.9;
-  }
-
-  var diameter = 30;
-
-  var v = -(vleft + vright) / 2; // x velocity
-  var w = (vright - vleft) / diameter; // angular velocity
-  var newTheta = theta + w * dt;
-
-  sim3pi.x = x + dt * v * Math.cos(newTheta);
-  sim3pi.y = y + dt * v * Math.sin(newTheta);
-  sim3pi.rotation = theta + dt * w;
-}
-
-function simulateAndShow() {
-  simulate();
-  drawImageCenter(mini3pi, sim3pi.x, sim3pi.y, sim3pi.rotation);
-  readPixel(sim3pi.x, sim3pi.y, sim3pi.rotation+3.14/2);
-
-  if(paused == false) {
-    var vc2 = jscpp["debugger"].setVariable("robot");
-    vc2["robot"].v.members.sensorValues.v = pololu3piSensorsResult;
-  }
-
-  setTimeout(simulateAndShow, 50);
-}
 
 var editor = document.getElementById("editor");
 editor.style.float = 'right';
