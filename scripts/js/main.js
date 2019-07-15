@@ -158,7 +158,7 @@ function insertSensors(object) {
         var sensor = new THREE.Points( dotGeometry, dotMaterial);
         sensor.position.x = x;
         sensor.position.y = y;
-        sensor.position.z = 3;
+        sensor.position.z = 1;
         sensor.name = "sensor_" + i;
         object.add( sensor );
     }
