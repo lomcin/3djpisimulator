@@ -406,7 +406,7 @@ Main = React.createClass({
     brand = React.createElement("a", {
       "href": void 0,
       "className": "logo"
-    }, "JPi Simulator");
+    }, "3D JPi Simulator");
     return React.createElement("div", null, React.createElement("input", {
       "type": "file",
       "ref": "hiddenfile",

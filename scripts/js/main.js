@@ -335,9 +335,13 @@ document.body.onresize = function() {
 
 window.addEventListener("keydown", keyDownListener, true);
 window.addEventListener("keyup", keyUpListener, false);
+simulationScreen.addEventListener("mouseover",function() {simulationScreen.isMouseOver = true;});
+simulationScreen.addEventListener("mouseout",function() {simulationScreen.isMouseOver = false;});
 
 function keyDownListener(e) {
-    kb.key[e.key] = true;
+    if (simulationScreen.isMouseOver) {
+        kb.key[e.key] = true;
+    }
 }
 function keyUpListener(e) {
     if(kb.key['c']) {
