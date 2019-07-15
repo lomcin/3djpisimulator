@@ -19,10 +19,10 @@ var ui = {
     isRotating : false,
     cameraFocusOnRobot : true,
     cameraTheta : 0,
-    cameraPhi : Math.PI/3,
+    cameraPhi : Math.PI/5,
     lastCameraTheta : 0,
     lastCameraPhi : this.cameraPhi,
-    cameraDistanceFromFocus : 2,
+    cameraDistanceFromFocus : 80,
     firstPersonCamera : false,
     minimumDistanceFromRobot : 20,
     textureScale: 10 // 10 pixels for 1 centimeter, 1000 pixels for 1 meter
@@ -126,6 +126,7 @@ function setTrackScaleFromTexture(texture) {
 function init() {
     simulationScreen = document.getElementById("simulationScreen");
     scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xFFFFFFFF);
     // instantiate a loader
     var loader = new THREE.OBJLoader();
 
@@ -136,7 +137,7 @@ function init() {
     textures = {
         bg 			: new THREE.TextureLoader().load( 'assets/img/bg.jpg' ),
         // track 	: new THREE.TextureLoader().load( 'assets/img/7pixels.png', function(texture) {geometries.plane = new THREE.PlaneGeometry(texture.image.width,texture.image.height); geometries.plane.needsUpdate=true;} ),
-        track 	: new THREE.TextureLoader().load( 'assets/img/7pixels.png', setTrackScaleFromTexture ),
+        track 	: new THREE.TextureLoader().load( 'assets/img/3cm.png', setTrackScaleFromTexture ),
         einstein 	: new THREE.TextureLoader().load( 'assets/img/einstein.jpg' )
     };
     
@@ -318,11 +319,11 @@ function render() {
         if (ui.firstPersonCamera) {
             camera.position.x = robot.position.x;
             camera.position.y = robot.position.y;
-            camera.position.z = robot.position.z + 20;
+            camera.position.z = robot.position.z + 10;
 
             var rot = robot.rotation.z - Math.PI*0.5;
 
-            camera.lookAt(robot.position.x + Math.cos(rot)*10000,robot.position.y + Math.sin(rot)*10000,0);
+            camera.lookAt(robot.position.x + Math.cos(rot)*50,robot.position.y + Math.sin(rot)*50,0);
 
         } else {
             camera.position.x = robot.position.x + ui.cameraDistanceFromFocus*Math.sin(ui.cameraTheta)*Math.cos(ui.cameraPhi);
