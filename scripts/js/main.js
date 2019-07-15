@@ -112,10 +112,10 @@ function loadNewTrack(filePath) {
     textures.track = new THREE.TextureLoader().load( filePath );
 }
 
-function loadNewTrackFromData(canvas, width, height) {
-    var size = width * height;
-
+function loadNewTrackFromCanvas(canvas, width, height) {
     textures.track = new THREE.CanvasTexture(canvas);
+    background = textures.track.image;
+    backgroundData = background.data;
     meshes.planeMesh.material.map = textures.track;
     meshes.planeMesh.material.map.needsUpdate = true;
 }
@@ -123,13 +123,25 @@ function loadNewTrackFromData(canvas, width, height) {
 function loadNewTrackFromImage(img) {
     // backgroundData = getImageData(img);
     canvas = getImageCanvas(img);
-    loadNewTrackFromData(canvas,img.width,img.height);
+    loadNewTrackFromCanvas(canvas,img.width,img.height);
     setTrackScaleFromTexture(textures.track);
     console.log("loaded");
 }
 
+function getPixel(canvas, x, y) {
+    var ctx = canvas.getContext('2d');
+    var pixel = [255,255,255,255];
+    if (x > -1 && x < canvas.width && y > -1 && y < canvas.height) {
+        pixel = ctx.getImageData(x, y, 1, 1).data;
+        console.log(pixel);
+    }
+    return pixel;
+}
+
 function setTrackScaleFromTexture(texture) {
     meshes.planeMesh.scale.set(texture.image.width/ui.textureScale,texture.image.height/ui.textureScale,1);
+    // background = texture.image;
+    // backgroundData = background.data;
     console.log("scaled");
 }
 
@@ -153,22 +165,27 @@ function insertSensors(object) {
 }
 
 function getSensorsPositions(object) {
-    var sensorsPositions = Array();
+    var sensorsPositions = new Array();
     for (var i=0;i<5;i++) {
         var sensor = robot.getObjectByName("sensor_"+i);
         sensor.updateMatrixWorld();
         var vector = sensor.position.clone();
         sensorsPositions.push(vector.applyMatrix4( sensor.matrixWorld.clone() ));
     }
+    console.log("getSensorsPositions");
+    console.log(sensorsPositions);
     return sensorsPositions;
 }
 
 function readSensors(sensorsPositions) {
     var tempSensor = 0;
     var sum = 0;
+    console.log("readSensors");
+    // console.log(sensorsPositions);
     for (var i=0; i<5; i++) {
-        // pololu3piSensors[i] = backgroundData.data[(tempy*735+tempx)*4];
-        pololu3piSensors[i] = (i == 2 ? 0 : 1); 
+        // pololu3piSensors[i] = backgroundData[(sensorsPositions[i].y*background.width+sensorsPositions[i].x)*4];
+        pololu3piSensors[i] = getPixel(background,sensorsPositions[i].x*ui.textureScale + background.width*0.5, background.height*0.5 - sensorsPositions[i].y*ui.textureScale)[0];
+        //pololu3piSensors[i] = (i != 4 && i!=0 ? 0 : 255); 
         tempSensor += (pololu3piSensors[i]/255.0)*(i+1)*1000;
         sum += pololu3piSensors[i]/255.0;
       }
@@ -181,7 +198,9 @@ function readSensors(sensorsPositions) {
 }
 
 function init() {
-
+    for(var i=0;i<5;i++) {
+        pololu3piSensors.push(0);
+    }
     simulationScreen = document.getElementById("simulationScreen");
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xFFFFFFFF);
@@ -195,7 +214,7 @@ function init() {
     textures = {
         bg 			: new THREE.TextureLoader().load( 'assets/img/bg.jpg' ),
         // track 	: new THREE.TextureLoader().load( 'assets/img/7pixels.png', function(texture) {geometries.plane = new THREE.PlaneGeometry(texture.image.width,texture.image.height); geometries.plane.needsUpdate=true;} ),
-        track 	: new THREE.TextureLoader().load( 'assets/img/3cm.png', setTrackScaleFromTexture ),
+        track 	: new THREE.TextureLoader().load( 'assets/img/3cm.png', function(texture) {loadNewTrackFromImage(texture.image);}),
         einstein 	: new THREE.TextureLoader().load( 'assets/img/einstein.jpg' )
     };
     
@@ -356,7 +375,7 @@ function init() {
         // drawImageCenter(mini3pi, sim3pi.x, sim3pi.y, sim3pi.rotation);
         //readPixel(sim3pi.x, sim3pi.y, sim3pi.rotation+3.14/2);
         var sensorPositions = getSensorsPositions(robot);
-        // readSensors(sensorPositions);
+        readSensors(sensorPositions);
         
         var vc2 = jscpp["debugger"].setVariable("robot");
         vc2["robot"].v.members.sensorValues.v = pololu3piSensorsResult;

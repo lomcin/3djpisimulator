@@ -8,7 +8,7 @@ var paused = true;
 var simulationScreen;
 
 
-var pololu3piSensors = [];
+var pololu3piSensors = Array();
 var pololu3piSensorsResult = 0;
 
 var sim3pi = {
