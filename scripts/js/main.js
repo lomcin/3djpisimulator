@@ -22,9 +22,10 @@ var ui = {
     cameraPhi : Math.PI/3,
     lastCameraTheta : 0,
     lastCameraPhi : this.cameraPhi,
-    cameraDistanceFromFocus : 8000,
+    cameraDistanceFromFocus : 2,
     firstPersonCamera : false,
-    textureScale: 1000 // 1000 pixels for 1 meter
+    minimumDistanceFromRobot : 20,
+    textureScale: 10 // 10 pixels for 1 centimeter, 1000 pixels for 1 meter
 };
 
 function getImageData( image ) {
@@ -118,7 +119,7 @@ function loadNewTrackFromImage(img) {
 }
 
 function setTrackScaleFromTexture(texture) {
-    meshes.planeMesh.scale.set(texture.image.width,texture.image.height,1);
+    meshes.planeMesh.scale.set(texture.image.width/ui.textureScale,texture.image.height/ui.textureScale,1);
     console.log("scaled");
 }
 
@@ -140,7 +141,7 @@ function init() {
     };
     
     geometries = {
-        box 		: new THREE.BoxGeometry(500, 500, 500),
+        box 		: new THREE.BoxGeometry(10, 10, 10),
         plane 		: new THREE.PlaneGeometry(1,1)
     };
 
@@ -274,10 +275,10 @@ function init() {
         e.preventDefault();
         if (e.deltaY > 0) {
             ui.cameraDistanceFromFocus *= 1. + Math.min((e.deltaY*0.001),1);
-            ui.cameraDistanceFromFocus = Math.max(ui.cameraDistanceFromFocus,100);
+            ui.cameraDistanceFromFocus = Math.max(ui.cameraDistanceFromFocus,ui.minimumDistanceFromRobot);
         } else {
             ui.cameraDistanceFromFocus *= 1. + Math.max((e.deltaY*0.001),-0.9);
-            ui.cameraDistanceFromFocus = Math.max(ui.cameraDistanceFromFocus,100);
+            ui.cameraDistanceFromFocus = Math.max(ui.cameraDistanceFromFocus,ui.minimumDistanceFromRobot);
         }
     }
 
@@ -411,11 +412,12 @@ renderer.domElement.addEventListener("mousemove", mouseMove, false);
 renderer.domElement.addEventListener("touchmove", touchMove, false);
 
 function mouseMove(event) {
-    mouseX = (event.clientX - windowHalfX) / windowHalfX;
-        mouseY = (event.clientY - windowHalfY) / windowHalfY;
+    mouseX = (event.layerX - windowHalfX) / windowHalfX;
+        mouseY = (event.layerY - windowHalfY) / windowHalfY;
     
     if (ui.cameraFocusOnRobot) {
         if (!ui.firstPersonCamera) {
+                console.log(event);
                 if (ui.isRotating) {
                 ui.cameraTheta = ui.lastCameraTheta + Math.PI*(lastMouseX - mouseX);
                 ui.cameraPhi = ui.lastCameraPhi + Math.PI*(mouseY - lastMouseY)*0.5;
@@ -431,8 +433,8 @@ function mouseMove(event) {
 
 function touchMove(event) {
     event.preventDefault();
-    mouseX = (event.touches[0].clientX - windowHalfX) / windowHalfX;
-        mouseY = (event.touches[0].clientY - windowHalfY) / windowHalfY;
+    mouseX = (event.touches[0].layerX - windowHalfX) / windowHalfX;
+        mouseY = (event.touches[0].layerY - windowHalfY) / windowHalfY;
         touchX = mouseX;
         touchY = mouseY;
     
