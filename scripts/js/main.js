@@ -193,7 +193,7 @@ function readSensors(sensorsPositions) {
     
       tempSensor /= sum;
     
-      console.log(tempSensor);
+    //   console.log(tempSensor);
     
       pololu3piSensorsResult = tempSensor;
 }
@@ -580,7 +580,7 @@ function simulate() {
         var y = robot.position.y;
         var theta = robot.rotation.z;
     
-        var dt = 0.01;
+        var dt = 0.005;
     
         var vc = jscpp["debugger"].setVariable("OrangutanMotors");
         var vleft = -vc["OrangutanMotors"].v.members.vleft.v;
